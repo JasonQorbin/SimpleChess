@@ -46,16 +46,30 @@ public:
     Piece* board[NUM_ROWS][NUM_COLS];
 
     GameBoard(){zeroBoard();}
+
     ~GameBoard(){deletePieces();}
-    Piece* getPiece (int row, int col){
+
+    GameBoard( const GameBoard& otherBoard) {
+        for (int currentRow = 0; currentRow < NUM_ROWS; currentRow++) {
+            for (int currentCol = 0; currentCol < NUM_COLS; currentCol++) {
+                Piece* pieceToCopy = otherBoard.getPiece(currentRow, currentCol);
+                if (pieceToCopy == nullptr) {
+                    board[currentRow][currentCol] = nullptr;
+                } else {
+                    board[currentRow][currentCol] = new Piece( pieceToCopy->symbol, pieceToCopy->pieceColour);
+                }
+            }
+        }
+    }
+
+    Piece* getPiece (int row, int col) const{
         return board[row] [col];
     }
 
-    void printBoard(){
-        const char* topBorder = "╔════╤════╤════╤════╤════╤════╤════╤════╗\n";
-        const char* middleBorder = "╟────┼────┼────┼────┼────┼────┼────┼────╢\n";
-        const char* bottomBorder = "╚════╧════╧════╧════╧════╧════╧════╧════╝\n";
-
+    void printBoard() {
+        const char *topBorder = "╔════╤════╤════╤════╤════╤════╤════╤════╗\n";
+        const char *middleBorder = "╟────┼────┼────┼────┼────┼────┼────┼────╢\n";
+        const char *bottomBorder = "╚════╧════╧════╧════╧════╧════╧════╧════╝\n";
 
         std::string buffer;
         buffer.reserve(750);
@@ -63,23 +77,24 @@ public:
         for (int currentRow = 0; currentRow < NUM_ROWS; currentRow++) {
             buffer += "║";
             for (int currentCol = 0; currentCol < NUM_COLS; currentCol++) {
-                Piece* currentPiece = board[currentRow][currentCol];
-                if (currentPiece!= nullptr) {
+                Piece *currentPiece = board[currentRow][currentCol];
+                if (currentPiece != nullptr) {
                     buffer += currentPiece->getPaddedSymbol();
                 } else {
                     buffer += "    "; //four spaces
                 }
-                buffer += currentCol == NUM_COLS-1 ? "║" : "│";
+                buffer += currentCol == NUM_COLS - 1 ? "║" : "│";
             }
             buffer += "\n";
-            if (currentRow != NUM_ROWS - 1 ) buffer += middleBorder;
+            if (currentRow != NUM_ROWS - 1) buffer += middleBorder;
         }
-        buffer += bottomBorder;
-        buffer += "\n";
-        std::cout << buffer <<std::flush;
+            buffer += bottomBorder;
+            buffer += "\n";
+            std::cout << buffer << std::flush;
+
     }
 
-    void zeroBoard(){
+    void zeroBoard() {
         for (int rows = 0; rows < NUM_ROWS; rows++) {
             for (int cols = 0; cols < NUM_COLS; cols++) {
                 board[rows][cols] = nullptr;
@@ -88,7 +103,7 @@ public:
         }
     }
 
-    void deletePieces(){
+    void deletePieces() {
         for (int rows = 0; rows < NUM_ROWS; rows++) {
             for (int cols = 0; cols < NUM_COLS; cols++) {
                 Piece* toRemove = board[rows][cols];
@@ -131,5 +146,9 @@ int main(){
     GameBoard gameBoard;
     gameBoard.initializeChessBoard();
     gameBoard.printBoard();
+    std::cout <<"This is the Copy : \n";
+    GameBoard copy(gameBoard);
+    copy.printBoard();
     std::cin.get();
+    return 0;
 }
