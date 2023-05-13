@@ -3,7 +3,10 @@
 #include <string>
 #include <cstring>
 
-
+struct Position {
+    int row;
+    int col;
+};
 
 class GameBoard;
 
@@ -16,8 +19,12 @@ public:
 
     char* symbol;
     colour pieceColour;
-    Piece(char* sym) : symbol(sym){};
-    Piece(char* sym, colour col) : symbol(sym), pieceColour(col){};
+    Position position;
+    Piece(char* sym, colour col, int row, int column) : symbol(sym), pieceColour(col){
+        position.row = row;
+        position.col = column;
+    };
+
 
     std::string getPaddedSymbol(){
         std::string buffer;
@@ -37,6 +44,8 @@ public:
         if (buffer.size() < 4) buffer += " ";
         return buffer;
     }
+
+
 };
 
 class GameBoard {
@@ -47,7 +56,7 @@ public:
 
     GameBoard(){zeroBoard();}
 
-    ~GameBoard(){deletePieces();}
+    ~GameBoard(){ deleteAllPieces();}
 
     GameBoard( const GameBoard& otherBoard) {
         for (int currentRow = 0; currentRow < NUM_ROWS; currentRow++) {
@@ -56,7 +65,7 @@ public:
                 if (pieceToCopy == nullptr) {
                     board[currentRow][currentCol] = nullptr;
                 } else {
-                    board[currentRow][currentCol] = new Piece( pieceToCopy->symbol, pieceToCopy->pieceColour);
+                    board[currentRow][currentCol] = new Piece( pieceToCopy->symbol, pieceToCopy->pieceColour, currentRow, currentCol);
                 }
             }
         }
@@ -103,7 +112,7 @@ public:
         }
     }
 
-    void deletePieces() {
+    void deleteAllPieces() {
         for (int rows = 0; rows < NUM_ROWS; rows++) {
             for (int cols = 0; cols < NUM_COLS; cols++) {
                 Piece* toRemove = board[rows][cols];
@@ -112,29 +121,37 @@ public:
         }
     }
 
+    void deletePiece(Piece* toDelete){
+        if (toDelete != nullptr) delete toDelete;
+    }
+
+    void deletePiece(int row, int col) {
+        deletePiece(getPiece(row, col));
+    }
+
     void initializeChessBoard(){
         const char* backLine [] = {"R", "Kn", "Bi", "Ki", "Qu", "Bi", "Kn", "R"};
         const char* pawnLine [] = {"p", "p", "p", "p", "p", "p", "p", "p"};
-        for (int rows = 0; rows < NUM_ROWS; rows++) {
-            for (int cols = 0; cols < NUM_COLS; cols++) {
-                switch (rows){
+        for (int currentRow = 0; currentRow < NUM_ROWS; currentRow++) {
+            for (int currentColumn = 0; currentColumn < NUM_COLS; currentColumn++) {
+                switch (currentRow){
                     case 0:
-                        board[rows][cols] = new Piece((char*)(backLine[cols]), Piece::colour::BLACK);
+                        board[currentRow][currentColumn] = new Piece((char*)(backLine[currentColumn]), Piece::colour::BLACK, currentRow, currentColumn);
                         break;
 
                     case 1:
-                        board[rows][cols] = new Piece((char*)(pawnLine[cols]), Piece::colour::BLACK);
+                        board[currentRow][currentColumn] = new Piece((char*)(pawnLine[currentColumn]), Piece::colour::BLACK, currentRow, currentColumn);
                         break;
 
                     case 6:
-                        board[rows][cols] = new Piece((char*)(pawnLine[cols]), Piece::colour::WHITE);
+                        board[currentRow][currentColumn] = new Piece((char*)(pawnLine[currentColumn]), Piece::colour::WHITE, currentRow, currentColumn);
                         break;
 
                     case 7:
-                        board[rows][cols] = new Piece((char*)(backLine[cols]), Piece::colour::WHITE);
+                        board[currentRow][currentColumn] = new Piece((char*)(backLine[currentColumn]), Piece::colour::WHITE, currentRow, currentColumn);
                         break;
                     default:
-                        board[rows][cols] = nullptr;
+                        board[currentRow][currentColumn] = nullptr;
                 }
             }
         }
