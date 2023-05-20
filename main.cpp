@@ -1,5 +1,5 @@
 #include <iostream>
-#include "GamePieces.h"
+#include "GamePieces.hpp"
 
 
 
@@ -8,5 +8,6 @@ int main(){
     gameBoard.initializeChessBoard();
     gameBoard.printBoard();
     std::cin.get();
+    gameBoard.deleteAllPieces();
     return 0;
 }
