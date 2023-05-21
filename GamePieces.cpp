@@ -132,33 +132,6 @@ GamePiece* GameBoard::getPiece (Position position) const {
     return board[position.row][position.col];
 }
 
-void GameBoard::printBoard() {
-    const char *topBorder = "╔════╤════╤════╤════╤════╤════╤════╤════╗\n";
-    const char *middleBorder = "╟────┼────┼────┼────┼────┼────┼────┼────╢\n";
-    const char *bottomBorder = "╚════╧════╧════╧════╧════╧════╧════╧════╝\n";
-
-    std::string buffer;
-    buffer.reserve(750);
-    buffer += topBorder;
-    for (int currentRow = 0; currentRow < NUM_ROWS; currentRow++) {
-        buffer += "║";
-        for (int currentCol = 0; currentCol < NUM_COLS; currentCol++) {
-            GamePiece *currentPiece = board[currentRow][currentCol];
-            if (currentPiece != nullptr) {
-                buffer += currentPiece->getPaddedSymbol();
-            } else {
-                buffer += "    "; //four spaces
-            }
-            buffer += currentCol == NUM_COLS - 1 ? "║" : "│";
-        }
-        buffer += "\n";
-        if (currentRow != NUM_ROWS - 1) buffer += middleBorder;
-    }
-    buffer += bottomBorder;
-    buffer += "\n";
-    std::cout << buffer << std::flush;
-
-}
 
 std::string Rook::getPaddedSymbol() { return " R  ";}
 std::string Knight::getPaddedSymbol() { return " Kn ";}
