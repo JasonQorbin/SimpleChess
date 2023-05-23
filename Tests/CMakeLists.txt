@@ -1,0 +1,19 @@
+
+
+add_executable(Piece_Tests Piece_Tests.cpp)
+
+add_test(NAME sampleTest COMMAND Piece_Tests)
+add_test(NAME CaptureTest COMMAND Piece_TestsCaptureTest)
+add_test(NAME PawnNormalMoveTest COMMAND Piece_TestsPawnNormalMoveTest)
+add_test(NAME PawnCaptureMoveTest COMMAND Piece_TestsPawnCaptureMoveTest)
+add_test(NAME PawnEnPassantTest COMMAND Piece_TestsPawnEnPassantTest)
+add_test(NAME PawnPromotionTest COMMAND Piece_TestsPawnPromotionTest)
+add_test(NAME KnightMoveTest COMMAND Piece_TestsKnightMoveTest)
+add_test(NAME BishopMoveTest COMMAND Piece_TestsBishopMoveTest)
+add_test(NAME RookNormalMoveTest COMMAND Piece_TestsRookNormalMoveTest)
+add_test(NAME KingNormalMoveTest COMMAND Piece_TestsKingNormalMoveTest)
+add_test(NAME KingShortCastleTest COMMAND Piece_TestsKingShortCastleTest)
+add_test(NAME KingLongCastleTest COMMAND Piece_TestsKingLongCastleTest)
+add_test(NAME KingCastleCheckBlockTest_1 COMMAND Piece_TestsKingCastleCheckBlockTest_1)
+add_test(NAME KingCastleCheckBlockTest_2 COMMAND Piece_TestsKingCastleCheckBlockTest_2)
+add_test(NAME KingCastleCheckBlockTest_3 COMMAND Piece_TestsKingCastleCheckBlockTest_3)

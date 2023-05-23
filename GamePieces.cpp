@@ -162,8 +162,43 @@ void GameBoard::deletePiece(GamePiece* toDelete){
     if (toDelete != nullptr) delete toDelete;
 }
 
+void GameBoard::deletePiece(Position position){
+    GamePiece* piece = getPiece(position);
+    if (piece != nullptr) deletePiece(piece);
+}
+
 void GameBoard::deletePiece(int row, int col) {
     deletePiece(getPiece(row, col));
+}
+
+void GameBoard::setPiece(GamePiece* piece, Position position){
+    board[position.row][position.col] = piece;
+}
+
+void GamePiece::movePiece(Position currentPosition, Position dest, GameBoard board){
+    std::vector<Position> moves = getPossibleMoves(board, currentPosition);
+
+    bool destinationValid = false;
+    for (Position check: moves) {
+        if (check == dest){
+            destinationValid = true;
+            break;
+        }
+    }
+
+    if (destinationValid){
+        board.movePiece(currentPosition, dest);
+    }
+}
+
+void GameBoard::movePiece(Position src, Position dest) {
+    GamePiece* piece = getPiece(src);
+
+    GamePiece* otherPiece = getPiece(dest);
+    if (otherPiece != nullptr) deletePiece(otherPiece);
+
+    setPiece(piece, dest);
+    setPiece(nullptr, src);
 }
 
 GamePiece** initBackLine (GamePiece::Team side){
@@ -189,6 +224,7 @@ GamePiece** initPawnLine (GamePiece::Team side) {
 
 
 void GameBoard::initializeChessBoard(){
+    deleteAllPieces();
     GamePiece** whiteBackLine = initBackLine(GamePiece::WHITE);
     GamePiece** blackBackLine = initBackLine(GamePiece::BLACK);
     GamePiece** whitePawnLine = initPawnLine(GamePiece::WHITE);
@@ -230,7 +266,7 @@ std::vector<Position> Rook::getPossibleMoves(const GameBoard& board, Position cu
     return moves;
 }
 
-void Rook::onMove(int distanceMoved){
+void Rook::onMove(){
     castlingRights = false;
 }
 
@@ -341,7 +377,7 @@ std::vector<Position>Pawn::getPossibleMoves(const GameBoard &board, Position cur
     return answer;
 }
 
-void King::onMove(int distanceMoved){
+void King::onMove(){
     castlingRights = false;
 }
 

@@ -3,4 +3,9 @@ project(WinChess)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(WinChess main.cpp GamePieces.cpp GamePieces.hpp CLI_GameLoop.cpp CLI_GameLoop.hpp)
+add_executable(WinChess main.cpp GamePieces.cpp GamePieces.hpp CLI_GameLoop.cpp CLI_GameLoop.hpp )
+
+#Tests
+enable_testing()
+
+add_subdirectory(Tests)

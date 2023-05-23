@@ -26,12 +26,17 @@ public:
     GameBoard( const GameBoard& otherBoard);
     GamePiece* getPiece (int row, int col) const;
     GamePiece* getPiece (Position position) const;
-    void printBoard();
+//    void printBoard();
     void zeroBoard();
     void deleteAllPieces();
-    void deletePiece(GamePiece* toDelete);
-    void deletePiece(int row, int col);
     void initializeChessBoard();
+    void movePiece(Position src, Position dest);
+
+private:
+    void setPiece(GamePiece* piece, Position position);
+    void deletePiece(GamePiece* toDelete);
+    void deletePiece(Position position);
+    void deletePiece(int row, int col);
 };
 
 struct Position {
@@ -77,6 +82,17 @@ struct Position {
     bool operator!=(const Position& otherPosition) const {
         return row != otherPosition.row || col != otherPosition.col;
     }
+
+    int distanceBetween(const Position& otherPosition) const {
+        int rowDiff = row - otherPosition.row;
+        if (rowDiff < 0) rowDiff *= -1;
+
+
+        int colDiff = col - otherPosition.col;
+        if (colDiff < 0) colDiff *= -1;
+
+        return rowDiff > colDiff ? rowDiff : colDiff;
+    }
 };
 
 class GamePiece{
@@ -100,6 +116,7 @@ public:
     virtual std::vector<Position> getPossibleMoves(const GameBoard& board, Position currentPosition) = 0;
     virtual std::string getPaddedSymbol() {return "";} ;
     std::string getName() {return name;}
+    virtual void movePiece(Position currentPosition, Position dest, GameBoard board);
 
 protected:
     std::string name;
@@ -124,7 +141,11 @@ public:
 
     std::vector<Position> getPossibleMoves(const GameBoard& board, Position currentPosition) override;
     std::string getPaddedSymbol() override;
-    void onMove(int distanceMoved);
+    void movePiece(Position currentPosition, Position dest, GameBoard board) override {
+        GamePiece::movePiece(currentPosition, dest, board);
+        onMove();
+    }
+    void onMove();
 };
 
 class Bishop : public GamePiece{
@@ -162,8 +183,11 @@ public:
 
     std::vector<Position> getPossibleMoves(const GameBoard& board, Position currentPosition) override;
     std::string getPaddedSymbol() override;
-
-    void onMove(int distanceMoved);
+    void movePiece(Position currentPosition, Position dest, GameBoard board) override {
+        GamePiece::movePiece(currentPosition, dest, board);
+        onMove();
+    }
+    void onMove();
 
 };
 
@@ -192,7 +216,10 @@ public:
 
     std::vector<Position> getPossibleMoves(const GameBoard& board, Position currentPosition) override;
     std::string getPaddedSymbol() override;
-
+    void movePiece(Position currentPosition, Position dest, GameBoard board) override{
+        GamePiece::movePiece(currentPosition, dest, board);
+        onMove(currentPosition.distanceBetween(dest));
+    }
     void onMove(int distanceMoved);
 
     bool enPassantIsAllowed();
