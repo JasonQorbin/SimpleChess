@@ -128,7 +128,7 @@ GamePiece* GameBoard::getPiece (int row, int col) const{
     return board[row] [col];
 }
 
-GamePiece* GameBoard::getPiece (Position position) const {
+GamePiece* GameBoard::getPiece (const Position& position) const {
     return board[position.row][position.col];
 }
 
@@ -153,29 +153,31 @@ void GameBoard::deleteAllPieces() {
     for (int rows = 0; rows < NUM_ROWS; rows++) {
         for (int cols = 0; cols < NUM_COLS; cols++) {
             GamePiece* toRemove = board[rows][cols];
-            if (toRemove != nullptr) {delete toRemove;}
+            if (toRemove != nullptr) {
+                delete toRemove;
+                board[rows][cols] = nullptr;
+            }
         }
     }
 }
 
-void GameBoard::deletePiece(GamePiece* toDelete){
-    if (toDelete != nullptr) delete toDelete;
-}
-
 void GameBoard::deletePiece(Position position){
-    GamePiece* piece = getPiece(position);
-    if (piece != nullptr) deletePiece(piece);
+    GameBoard::deletePiece(position.row, position.col);
 }
 
 void GameBoard::deletePiece(int row, int col) {
-    deletePiece(getPiece(row, col));
+    GamePiece* piece = board[row][col];
+    if (piece != nullptr) {
+        delete piece;
+        board[row][col] = nullptr;
+    }
 }
 
 void GameBoard::setPiece(GamePiece* piece, Position position){
     board[position.row][position.col] = piece;
 }
 
-void GamePiece::movePiece(Position currentPosition, Position dest, GameBoard board){
+void GamePiece::movePiece(Position currentPosition, Position dest, GameBoard& board){
     std::vector<Position> moves = getPossibleMoves(board, currentPosition);
 
     bool destinationValid = false;
@@ -195,7 +197,7 @@ void GameBoard::movePiece(Position src, Position dest) {
     GamePiece* piece = getPiece(src);
 
     GamePiece* otherPiece = getPiece(dest);
-    if (otherPiece != nullptr) deletePiece(otherPiece);
+    if (otherPiece != nullptr) deletePiece(dest);
 
     setPiece(piece, dest);
     setPiece(nullptr, src);
@@ -326,11 +328,11 @@ std::vector<Position>Pawn::getPossibleMoves(const GameBoard &board, Position cur
     //Check normal movement
     std::vector<Position> answer;
     int direction = pieceColour == WHITE ? 1 : -1;
-    Position toTest = currentPosition.offset(0, direction);
+    Position toTest = currentPosition.offset(direction, 0);
     if (board.getPiece(toTest) == nullptr) {
         answer.push_back(toTest);
         if (!hasMoved) {
-            Position toTest = currentPosition.offset(0, direction * 2);
+            Position toTest = currentPosition.offset(direction * 2, 0);
             if (board.getPiece(toTest) == nullptr) {
                 answer.push_back(toTest);
             }

@@ -6,17 +6,21 @@
 #include "GamePieces.hpp"
 #include <iostream>
 #include <string>
+#include <windows.h>
 
 void printBoard(const GameBoard& board) {
-    const char *topBorder = "╔════╤════╤════╤════╤════╤════╤════╤════╗\n";
-    const char *middleBorder = "╟────┼────┼────┼────┼────┼────┼────┼────╢\n";
-    const char *bottomBorder = "╚════╧════╧════╧════╧════╧════╧════╧════╝\n";
+    const char* columnLabels = "    A    B    C    D     E    F    G    H\n";
+    const char* topBorder =    "   ╔════╤════╤════╤════╤════╤════╤════╤════╗\n";
+    const char* middleBorder = "   ╟────┼────┼────┼────┼────┼────┼────┼────╢\n";
+    const char* bottomBorder = "   ╚════╧════╧════╧════╧════╧════╧════╧════╝\n";
     //TODO: print the row and column numbers;
     std::string buffer;
-    buffer.reserve(750);
+    buffer.reserve(850);
+    buffer += columnLabels;
     buffer += topBorder;
-    for (int currentRow = 0; currentRow < GameBoard::NUM_ROWS; currentRow++) {
-        buffer += "║";
+    for (int currentRow = GameBoard::NUM_ROWS -1 ; currentRow >= 0 ; currentRow--) {
+        buffer += currentRow + 49;
+        buffer += "  ║";
         for (int currentCol = 0; currentCol < GameBoard::NUM_COLS; currentCol++) {
             GamePiece *currentPiece = board.getPiece(currentRow,currentCol);
             if (currentPiece != nullptr) {
@@ -27,7 +31,7 @@ void printBoard(const GameBoard& board) {
             buffer += currentCol == GameBoard::NUM_COLS - 1 ? "║" : "│";
         }
         buffer += "\n";
-        if (currentRow != GameBoard::NUM_ROWS - 1) buffer += middleBorder;
+        if (currentRow != 0) buffer += middleBorder;
     }
     buffer += bottomBorder;
     buffer += "\n\n";
@@ -36,8 +40,9 @@ void printBoard(const GameBoard& board) {
 
 bool isInteger(const char* str) {
     bool answer = true;
-    char c = *str;
-    while (c != '\0') {
+    short length = strlen(str);
+    for (int i = 0; i < length; ++i) {
+        char c = str[i];
         if (c > 57 || (c < 48 && c != 43 && c != 45)){
             answer = false;
             break;
@@ -46,11 +51,11 @@ bool isInteger(const char* str) {
     return answer;
 }
 
-bool printMovePrompt(const GamePiece::Team currentPlayer, Position* src, Position* dest) {
+bool printMovePrompt(const GamePiece::Team currentPlayer, Position* src, Position* dest, const GameBoard& board) {
     using std::cout, std::cin , std::endl;
     const unsigned int INPUT_LIMIT = 10;
     cout << "Current player : " << (currentPlayer == GamePiece::WHITE ? "White" : "Black") <<endl;
-    cout << "Piece to move [ row; col] : ";
+    cout << "Piece to move [row;col] : ";
     char start[INPUT_LIMIT];
     cin.getline(start, INPUT_LIMIT);
 
@@ -59,42 +64,76 @@ bool printMovePrompt(const GamePiece::Team currentPlayer, Position* src, Positio
 
     char start_first [10];
     char start_second  [10];
-    strncpy(start_first, start, delimiterPosition - start);
-    strncpy(start_second, start, start + strlen(start) - delimiterPosition);
+    int bytesToCopy = delimiterPosition - start;
+    strncpy(start_first, start, bytesToCopy);
+    start_first[bytesToCopy] = '\0';
+    bytesToCopy =  start + strlen(start) - delimiterPosition - 1;
+    strncpy(start_second, delimiterPosition + 1,bytesToCopy);
+    start_second[bytesToCopy] = '\0';
 
     if (!isInteger(start_first)) return false; //Bad input
     if (!isInteger(start_second)) return false; //Bad input
 
+    Position srcPosition (atoi(start_first) - 1, atoi (start_second) -1);
+    GamePiece* srcPiece = board.getPiece(srcPosition);
+    if (srcPiece == nullptr) {
+        cout << "Empty square\n Press enter to try again." << endl;
+        cin.get();
+        return false;
+    } else {
+        cout << srcPiece -> printColour() << " " << srcPiece -> getName() << endl;
+        if (srcPiece -> pieceColour != currentPlayer) {
+            cout << "Selected the opponent's piece instead of your own\n"
+                 << "Press enter to try again" << endl;
+            return false;
+        }
+    }
+
     char target[INPUT_LIMIT];
-    cout << "Destination : ";
+    cout << "Destination [row;col]: ";
     cin.getline(target, INPUT_LIMIT);
 
+    delimiterPosition = strchr(target, ';');
+    if (delimiterPosition == nullptr) return false; //No semicolon found
     char target_first [10];
     char target_second  [10];
-    strncpy(target_first, target, delimiterPosition - target);
-    strncpy(target_second, target, target + strlen(target) - delimiterPosition);
+    bytesToCopy =  delimiterPosition - target;
+    strncpy(target_first, target,bytesToCopy);
+    target_first[bytesToCopy] = '\0';
+    bytesToCopy =  target + strlen(target) - delimiterPosition -1;
+    strncpy(target_second, delimiterPosition +1, bytesToCopy);
+    target_second[bytesToCopy] = '\0';
 
     if (!isInteger(target_first)) return false; //Bad input
     if (!isInteger(target_second)) return false; //Bad input
-    src-> set(atoi(start_first), atoi (start_second));
-    dest-> set(atoi(target_first), atoi (target_second));
+
+    Position destPosition(atoi(target_first) -1, atoi (target_second) -1);
+
+    src-> set(srcPosition.row, srcPosition.col);
+    dest-> set(destPosition.row, destPosition.col);
+
     return true;
 }
 
-void enterGameLoop(const GameBoard& board){
+void enterGameLoop(GameBoard& board){
     GamePiece::Team currentPlayer = GamePiece::WHITE;
     bool running = true;
 
     while (running) {
-        //Position to get the desired player move
+
         Position src(-1, -1), dest(-1,-1); //These are obviously invalid so don't use them unless successfulInput returns as true.
-        bool successfulInput = false;
+        bool successfulInput = true;
         // TODO: See if the active player is in check, checkmate or stalemate
-        // TODO: reset enpassant flags
-        while (!successfulInput) {
+        // TODO: reset enpassant flags at the beginning of a player's turn
+        while (successfulInput) {
             system("cls");
             printBoard(board);
-            successfulInput = printMovePrompt(currentPlayer, &src, &dest);
+            successfulInput = printMovePrompt(currentPlayer, &src, &dest, board);
+            if (successfulInput) {
+                GamePiece* somePiece = board.getPiece(src);
+                somePiece->movePiece(src,dest, board);
+                currentPlayer = currentPlayer == GamePiece::WHITE ? GamePiece::BLACK : GamePiece::WHITE;
+            }
         }
 
         /*

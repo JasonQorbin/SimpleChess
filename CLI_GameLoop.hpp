@@ -7,9 +7,9 @@
 
 #include "GamePieces.hpp"
 
-void enterGameLoop(const GameBoard& board);
+void enterGameLoop(GameBoard& board);
 void printBoard(const GameBoard& board);
-bool printMovePrompt(const GamePiece::Team currentPlayer, Position* src, Position* dest);
+bool printMovePrompt(const GamePiece::Team currentPlayer, Position* src, Position* dest, const GameBoard& board);
 bool isInteger(const char* str);
 
 #endif //WINCHESS_CLI_GAMELOOP_HPP
