@@ -36,10 +36,12 @@ GamePiece::getLinearMoves(const GameBoard &board, Position currentPosition, Posi
     bool pastCurrentPiecePosition = false;
 
     Position loopPosition (startPosition);
-
-    while (loopPosition != endPosition){
+    Position prevPosition = loopPosition;
+    while (prevPosition != endPosition){
         if (loopPosition == currentPosition) { //At the piece.
             pastCurrentPiecePosition = true;
+            prevPosition = loopPosition;
+            loopPosition.move(horizontalStep,verticalStep);
             continue;
         }
         GamePiece *otherPiece = board.getPiece(loopPosition);
@@ -52,11 +54,11 @@ GamePiece::getLinearMoves(const GameBoard &board, Position currentPosition, Posi
             } else {                                        //Friendly piece condition
                 answer.clear();
             }
-        }
-
-        if (pastCurrentPiecePosition) {
+        } else {
             if (otherPiece == nullptr) {
                 answer.push_back(loopPosition);
+                prevPosition = loopPosition;
+                loopPosition.move(horizontalStep,verticalStep);
                 continue;
             }
 
@@ -67,6 +69,7 @@ GamePiece::getLinearMoves(const GameBoard &board, Position currentPosition, Posi
 
             break;                                          //But in both cases, stop looking further;
         }
+        prevPosition = loopPosition;
         loopPosition.move(horizontalStep,verticalStep);
     }
     return answer;
@@ -90,17 +93,17 @@ std::vector<Position> GamePiece::getDiagonalMoves(const GameBoard& board, Positi
     using Utils::max, Utils::min;
     std::vector<Position> answer;
     //Upwards diagonal (left-to-right)
-    int backStep = min(min(currentPosition.row,range),  min(currentPosition.col, range));
-    int forwardStep = min(min(board.NUM_ROWS - 1 - currentPosition.row, range),min(board.NUM_COLS - 1 - currentPosition.col, range));
-    Position startPosition = currentPosition.offset(backStep, backStep);
-    Position endPosition = currentPosition.offset(forwardStep, forwardStep);
+    int maximumBackwardSteps = min(min(currentPosition.row, range), min(currentPosition.col, range));
+    int maximumForwardSteps = min(min(GameBoard::NUM_ROWS - 1 - currentPosition.row, range), min(GameBoard::NUM_COLS - 1 - currentPosition.col, range));
+    Position startPosition = currentPosition.offset(-maximumBackwardSteps, -maximumBackwardSteps);
+    Position endPosition = currentPosition.offset(maximumForwardSteps, maximumForwardSteps);
     answer = getLinearMoves(board, currentPosition, startPosition, endPosition, 1, 1);
 
     //Downwards diagonal (left-to-right)
-    backStep = min(min(currentPosition.row,range),  min(board.NUM_COLS - 1 - currentPosition.col, range));
-    forwardStep = min(min(board.NUM_ROWS - 1 - currentPosition.row, range),min(currentPosition.col, range));
-    startPosition = currentPosition.offset(backStep, backStep);
-    endPosition = currentPosition.offset(forwardStep, forwardStep);
+    maximumBackwardSteps = min(min(GameBoard::NUM_ROWS -1 - currentPosition.row, range), min(currentPosition.col, range));
+    maximumForwardSteps = min(min(currentPosition.row, range), min(GameBoard::NUM_COLS - 1 - currentPosition.col, range));
+    startPosition = currentPosition.offset(maximumBackwardSteps, -maximumBackwardSteps);
+    endPosition = currentPosition.offset(-maximumForwardSteps, maximumForwardSteps);
     std::vector<Position> secondSet = getLinearMoves(board, currentPosition, startPosition, endPosition, 1, -1);
     answer.insert(answer.end(), secondSet.begin(), secondSet.end());
     return answer;

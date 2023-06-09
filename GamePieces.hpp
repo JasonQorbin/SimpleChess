@@ -52,8 +52,8 @@ struct Position {
     }
 
     void move(int horizontalShift, int verticalShift){
-        row += horizontalShift;
-        col += verticalShift;
+        col += horizontalShift;
+        row += verticalShift;
     }
 
     bool positionValid(){

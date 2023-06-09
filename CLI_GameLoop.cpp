@@ -9,7 +9,7 @@
 #include <windows.h>
 
 void printBoard(const GameBoard& board) {
-    const char* columnLabels = "    A    B    C    D     E    F    G    H\n";
+    const char* columnLabels = "    A(1) B(2) C(3) D(4)  E(5) F(6) G(7) H(8)\n";
     const char* topBorder =    "   ╔════╤════╤════╤════╤════╤════╤════╤════╗\n";
     const char* middleBorder = "   ╟────┼────┼────┼────┼────┼────┼────┼────╢\n";
     const char* bottomBorder = "   ╚════╧════╧════╧════╧════╧════╧════╧════╝\n";
@@ -85,6 +85,7 @@ bool printMovePrompt(const GamePiece::Team currentPlayer, Position* src, Positio
         if (srcPiece -> pieceColour != currentPlayer) {
             cout << "Selected the opponent's piece instead of your own\n"
                  << "Press enter to try again" << endl;
+            cin.get();
             return false;
         }
     }
